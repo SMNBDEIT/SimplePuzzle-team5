@@ -4,31 +4,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Team 5's Puzzling Game</title>
     <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body>
-    <div style="display: grid; grid-template-columns: 32em auto; grid-template-rows: auto 8em; height: 95vh; grid-template-areas: 'board text' ' buttons buttons'">
+    <div
+        style="display: grid; grid-template-columns: 32em auto; grid-template-rows: auto 8em; height: 95vh; grid-template-areas: 'board text' ' buttons buttons'">
         <div id="board" style="grid-area: board;"></div>
         <div id="exerciseText" style="overflow-y: scroll;height: 32em;grid-area: text;"></div>
         <div id="buttons" style="background-color: lightblue;grid-area: buttons;"></div>
     </div>
     <script>
-        addPuzzlePiece('board', false, false, true, true, '', 1, 24, 0);
-        addPuzzlePiece('board', false, true, true, true, '', 2, 18, 0);
-        addPuzzlePiece('board', false, true, true, true, '', 1, 12, 0);
-        addPuzzlePiece('board', true, false, true, true, '', 2, 24, 6);
+        // addPuzzlePiece('board', true, false, true, true, '', 1, 24, 0);
+        // addPuzzlePiece('board', false, true, true, true, '', 2, 18, 0);
+        // addPuzzlePiece('board', false, true, true, true, '', 1, 12, 0);
+        // addPuzzlePiece('board', true, false, true, true, '', 2, 24, 6);
 
-        addPuzzlePiece('buttons', true, true, true, true, 'addNormalPuzzlePieceToBoard()', 1);
-        addPuzzlePiece('buttons', false, true, true, true, 'addPuzzlePieceWithoutTopToBoard()', 2);
-        addPuzzlePiece('buttons', false, false, true, true, 'addPuzzlePieceWithoutRightAndTopToBoard()', 1);
+        // addPuzzlePiece('board', true, true, true, true, '', 1, 12, 12);
+
+        // addPuzzlePiece('buttons', false, true, true, true, 'addPuzzlePieceWithoutTopToBoard("withoutTop")', 2);
+        // addPuzzlePiece('buttons', false, false, true, true, 'addPuzzlePieceWithoutRightAndTopToBoard()', 1);
+
+        // 24-0, 18-0, 12-0, 6-0, 0-0
+        // 24-1, 18-1, 12-1, 6-1, 0-1 
+        // 
+        // 
+        // 
+
+
+
+        // top, right, bottom, left
+        addPuzzlePiece('buttons', true, true, true, true, "addPuzzlePieceToBoard('normal')", 1);
+        addPuzzlePiece('buttons', false, true, true, false, "addPuzzlePieceToBoard('LeftCornerUp')", 2);
+        addPuzzlePiece('buttons', false, true, true, true, "addPuzzlePieceToBoard('UpperRow')", 1);
+        addPuzzlePiece('buttons', false, false, true, true, "addPuzzlePieceToBoard('RightCornerUp')", 2);
+        addPuzzlePiece('buttons', true, false, true, true, "addPuzzlePieceToBoard('RightSideIsFlat')", 1);
+        addPuzzlePiece('buttons', true, false, false, true, "addPuzzlePieceToBoard('RightCornerDown')", 2);
+        addPuzzlePiece('buttons', true, true, false, true, "addPuzzlePieceToBoard('BottomRow')", 1);
+        addPuzzlePiece('buttons', true, true, false, false, "addPuzzlePieceToBoard('LeftCornerDown')", 2);
+        addPuzzlePiece('buttons', true, true, true, false, "addPuzzlePieceToBoard('LeftSideIsFlat')", 1);
+
         function addPuzzlePiece(toId, hasTop, hasRight, hasBottom, hasLeft, onclick, color, leftPosition, topPosition) {
             let style = '';
             if (leftPosition !== undefined) {
                 style = `left: ${leftPosition + 0.5}em; top: ${topPosition + 0.5}em`;
             }
-
+            //onclick is a plug for a future buttons
             document.getElementById(toId).innerHTML += /*HTML*/`
                 <div class="jigsaw${color}" onclick="${onclick}" style="${style}">
                     ${hasTop ? `<span class="t"></span>` : ''}
@@ -39,8 +61,110 @@
             `;
         }
 
+        //Andrew's suggestions
+        //          1.Start with a basic addNormalPuzzlePieceToBoard() to simply add a piece to the board.
+        //          2.Implement the placement algorithm (correct leftPosition and topPosition).
+        //          3.Add alternating colors.
+        //          4.Make buttons for different puzzle types.
+        //          5.Implement placement rules.
+
+        // Torbjørn brainstorming
+        let currentPosUp = 0; // + 6 each time % 24
+        let currentPosLeft = 24; // - 6 each time, if( .value - 6 > 0 { .value = 24 + leftoveramount })
+        let currentColor = 1; // 1 for light-blue, 2 for dark-blue
+        let isFirstPiece = true;
+
+        function addPuzzlePieceToBoard(type) {
+            //things we need in a more readable way
+            let newPiece = {
+                toId: 'board',
+                hasTop: false,
+                hasRight: false,
+                hasBottom: false,
+                hasLeft: false,
+                onclick: 'temp()',
+                color: 1, // 1 for light-blue, 2 for dark-blue
+                leftPosition: 0,
+                topPosition: 0,
+            };
+            
+            console.log(isFirstPiece);
+            if (isFirstPiece === false) {
+                getNewPosition();
+            } else {
+                isFirstPiece = false;
+            }
+            getNewColor();
+            
+            if (type == "RightCornerUp") {
+                addPuzzlePiece('board', false, false, true, true, '', currentColor, currentPosLeft, currentPosUp);
+                console.log("RightCornerUp");
+            }
+            else if (type == "UpperRow") {
+                addPuzzlePiece('board', false, true, true, true, '', currentColor, currentPosLeft, currentPosUp);
+                console.log("UpperRow");
+            }
+            else if (type == "LeftCornerUp") {
+                addPuzzlePiece('board', false, true, true, false, '', currentColor, currentPosLeft, currentPosUp);
+                console.log("LeftCornerUp");
+            }
+            else if (type == "RightSideIsFlat") {
+                addPuzzlePiece('board', true, false, true, true, '', currentColor, currentPosLeft, currentPosUp);
+                console.log("RightSideIsFlat");
+            }
+            else if (type == "normal") {
+                addPuzzlePiece('board', true, true, true, true, '', currentColor, currentPosLeft, currentPosUp);
+                console.log("normal");
+            }
+            else if (type == "LeftSideIsFlat") {
+                addPuzzlePiece('board', true, true, true, false, '', currentColor, currentPosLeft, currentPosUp);
+                console.log("LeftSideIsFlat");
+            }
+            else if (type == "RightCornerDown") {
+                addPuzzlePiece('board', true, false, false, true, '', currentColor, currentPosLeft, currentPosUp);
+                console.log("RightCornerDown");
+            }
+            else if (type == "BottomRow") {
+                addPuzzlePiece('board', true, true, false, true, '', currentColor, currentPosLeft, currentPosUp);
+                console.log("BottomRow");
+            }
+            else if (type == "LeftCornerDown") {
+                addPuzzlePiece('board', true, true, false, false, '', currentColor, currentPosLeft, currentPosUp);
+                console.log("LeftCornerDown");
+            }
+        }
+        // final square Up: 24, left: 0
+        function getNewPosition() {
+            // are you on the right side? yes? ok, make new row, unless it's the first row, then stay on same row
+            if (currentPosUp == 24 && currentPosLeft == 0) {
+                printYouWin();
+                showResetButton();
+            } else if ((currentPosLeft - 6) < 0) {
+                currentPosLeft = 24;
+                if (currentPosUp + 6 <= 24) {
+                    currentPosUp = currentPosUp + 6; // 1 row = 0 , 2 = 6, 3 = 12, 4 = 18, 5 = 24
+                }
+            } else {
+                currentPosLeft -= 6;
+            }
+            console.log("Left:", currentPosLeft, " Up:", currentPosUp);
+        }
+
+        function getNewColor() {
+            currentColor = (currentColor % 2 == 0) ? 1 : 2;
+            console.log(currentColor);
+        }
+
+        function printYouWin() {
+            console.log("You win! temporarily...");
+        }
+
+        function showResetButton() {
+            console.log("Still haven't added reset button, sorry.")
+        }
+
         document.getElementById('exerciseText').innerHTML = /*HTML*/`            
-                <h2>Oppgaver</h2>
+                <h2>Oppgave</h2>
                 <ol>
                     <li>Studer koden og prøv å forstå mest mulig av hva som foregår. CSS er ikke viktig, men på
                         <tt>board</tt> brukes <tt>position: absolute</tt>
