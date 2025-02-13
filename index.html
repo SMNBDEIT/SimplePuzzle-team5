@@ -16,41 +16,22 @@
         <div id="buttons" style="background-color: lightblue;grid-area: buttons;"></div>
     </div>
     <script>
-        // addPuzzlePiece('board', true, false, true, true, '', 1, 24, 0);
-        // addPuzzlePiece('board', false, true, true, true, '', 2, 18, 0);
-        // addPuzzlePiece('board', false, true, true, true, '', 1, 12, 0);
-        // addPuzzlePiece('board', true, false, true, true, '', 2, 24, 6);
-
-        // addPuzzlePiece('board', true, true, true, true, '', 1, 12, 12);
-
-        // addPuzzlePiece('buttons', false, true, true, true, 'addPuzzlePieceWithoutTopToBoard("withoutTop")', 2);
-        // addPuzzlePiece('buttons', false, false, true, true, 'addPuzzlePieceWithoutRightAndTopToBoard()', 1);
-
-        // 24-0, 18-0, 12-0, 6-0, 0-0
-        // 24-1, 18-1, 12-1, 6-1, 0-1 
-        // 
-        // 
-        // 
-
-
-
-        // top, right, bottom, left
-        addPuzzlePiece('buttons', true, true, true, true, "addPuzzlePieceToBoard('normal')", 1);
-        addPuzzlePiece('buttons', false, true, true, false, "addPuzzlePieceToBoard('LeftCornerUp')", 2);
-        addPuzzlePiece('buttons', false, true, true, true, "addPuzzlePieceToBoard('UpperRow')", 1);
-        addPuzzlePiece('buttons', false, false, true, true, "addPuzzlePieceToBoard('RightCornerUp')", 2);
-        addPuzzlePiece('buttons', true, false, true, true, "addPuzzlePieceToBoard('RightSideIsFlat')", 1);
-        addPuzzlePiece('buttons', true, false, false, true, "addPuzzlePieceToBoard('RightCornerDown')", 2);
-        addPuzzlePiece('buttons', true, true, false, true, "addPuzzlePieceToBoard('BottomRow')", 1);
-        addPuzzlePiece('buttons', true, true, false, false, "addPuzzlePieceToBoard('LeftCornerDown')", 2);
-        addPuzzlePiece('buttons', true, true, true, false, "addPuzzlePieceToBoard('LeftSideIsFlat')", 1);
+        //                        top, right, bottom, left
+        addPuzzlePiece('buttons', true, true, true, true, "addPuzzlePieceToBoard('normal', true, true, true, true)", 1);
+        addPuzzlePiece('buttons', false, true, true, false, "addPuzzlePieceToBoard('LeftCornerUp', false, true, true, false)", 2);
+        addPuzzlePiece('buttons', false, true, true, true, "addPuzzlePieceToBoard('UpperRow', false, true, true, true)", 1);
+        addPuzzlePiece('buttons', false, false, true, true, "addPuzzlePieceToBoard('RightCornerUp', false, false, true, true,)", 2);
+        addPuzzlePiece('buttons', true, false, true, true, "addPuzzlePieceToBoard('RightSideIsFlat', true, false, true, true)", 1);
+        addPuzzlePiece('buttons', true, false, false, true, "addPuzzlePieceToBoard('RightCornerDown', true, false, false, true)", 2);
+        addPuzzlePiece('buttons', true, true, false, true, "addPuzzlePieceToBoard('BottomRow', true, true, false, true)", 1);
+        addPuzzlePiece('buttons', true, true, false, false, "addPuzzlePieceToBoard('LeftCornerDown', true, true, false, false)", 2);
+        addPuzzlePiece('buttons', true, true, true, false, "addPuzzlePieceToBoard('LeftSideIsFlat', true, true, true, false)", 1);
 
         function addPuzzlePiece(toId, hasTop, hasRight, hasBottom, hasLeft, onclick, color, leftPosition, topPosition) {
             let style = '';
             if (leftPosition !== undefined) {
                 style = `left: ${leftPosition + 0.5}em; top: ${topPosition + 0.5}em`;
             }
-            //onclick is a plug for a future buttons
             document.getElementById(toId).innerHTML += /*HTML*/`
                 <div class="jigsaw${color}" onclick="${onclick}" style="${style}">
                     ${hasTop ? `<span class="t"></span>` : ''}
@@ -61,175 +42,159 @@
             `;
         }
 
-        //Andrew's suggestions
-        //          1.Start with a basic addNormalPuzzlePieceToBoard() to simply add a piece to the board.
-        //          2.Implement the placement algorithm (correct leftPosition and topPosition).
-        //          3.Add alternating colors.
-        //          4.Make buttons for different puzzle types.
-        //          5.Implement placement rules.
-
-        // Torbjørn brainstorming
         let currentPosUp = 0; // + 6 each time % 24
         let currentPosLeft = 24; // - 6 each time, if( .value - 6 > 0 { .value = 24 + leftoveramount })
         let currentColor = 1; // 1 for light-blue, 2 for dark-blue
         let isFirstPiece = true;
-
-        function addPuzzlePieceToBoard(type) {
-            //things we need in a more readable way
-            let newPiece = {
-                toId: 'board',
-                hasTop: false,
-                hasRight: false,
-                hasBottom: false,
-                hasLeft: false,
-                onclick: 'temp()',
-                color: 1, // 1 for light-blue, 2 for dark-blue
-                leftPosition: 0,
-                topPosition: 0,
-            };
-            
-            console.log(isFirstPiece);
-            if (isFirstPiece === false) {
-                getNewPosition();
-            } else {
+        let tempPosLeft = 24;
+        let tempPosUp = 0;
+        
+        function addPuzzlePieceToBoard(type, top, right, bottom, left) {
+            if (doesPuzzleFit(type)) {
                 isFirstPiece = false;
-            }
-            getNewColor();
-            
-            if (type == "RightCornerUp") {
-                addPuzzlePiece('board', false, false, true, true, '', currentColor, currentPosLeft, currentPosUp);
-                console.log("RightCornerUp");
-            }
-            else if (type == "UpperRow") {
-                addPuzzlePiece('board', false, true, true, true, '', currentColor, currentPosLeft, currentPosUp);
-                console.log("UpperRow");
-            }
-            else if (type == "LeftCornerUp") {
-                addPuzzlePiece('board', false, true, true, false, '', currentColor, currentPosLeft, currentPosUp);
-                console.log("LeftCornerUp");
-            }
-            else if (type == "RightSideIsFlat") {
-                addPuzzlePiece('board', true, false, true, true, '', currentColor, currentPosLeft, currentPosUp);
-                console.log("RightSideIsFlat");
-            }
-            else if (type == "normal") {
-                addPuzzlePiece('board', true, true, true, true, '', currentColor, currentPosLeft, currentPosUp);
-                console.log("normal");
-            }
-            else if (type == "LeftSideIsFlat") {
-                addPuzzlePiece('board', true, true, true, false, '', currentColor, currentPosLeft, currentPosUp);
-                console.log("LeftSideIsFlat");
-            }
-            else if (type == "RightCornerDown") {
-                addPuzzlePiece('board', true, false, false, true, '', currentColor, currentPosLeft, currentPosUp);
-                console.log("RightCornerDown");
-            }
-            else if (type == "BottomRow") {
-                addPuzzlePiece('board', true, true, false, true, '', currentColor, currentPosLeft, currentPosUp);
-                console.log("BottomRow");
-            }
-            else if (type == "LeftCornerDown") {
-                addPuzzlePiece('board', true, true, false, false, '', currentColor, currentPosLeft, currentPosUp);
-                console.log("LeftCornerDown");
+                currentPosUp = tempPosUp;
+                currentPosLeft = tempPosLeft;
+                currentColor = getNewColor();
+                addPuzzlePiece('board', top, right, bottom, left, '', currentColor, currentPosLeft, currentPosUp);
+                checkWinCondition();
             }
         }
-        // final square Up: 24, left: 0
-        function getNewPosition() {
-            // are you on the right side? yes? ok, make new row, unless it's the first row, then stay on same row
-            if (currentPosUp == 24 && currentPosLeft == 0) {
-                printYouWin();
-                showResetButton();
-            } else if ((currentPosLeft - 6) < 0) {
-                currentPosLeft = 24;
-                if (currentPosUp + 6 <= 24) {
-                    currentPosUp = currentPosUp + 6; // 1 row = 0 , 2 = 6, 3 = 12, 4 = 18, 5 = 24
+
+        function doesPuzzleFit(type) {
+            // sets currentPos to tempPos that passed validation check
+            tempPosLeft = currentPosLeft;
+            tempPosUp = currentPosUp;
+            if (isFirstPiece === false) {
+                checkNewPosition();
+            }
+            // Compares type to position on board
+            if (type == "RightCornerUp" && tempPosLeft == 24 && tempPosUp == 0) {
+                return true;
+            }
+            else if (type == "UpperRow" && (tempPosLeft == 6 || tempPosLeft == 12 || tempPosLeft == 18) && tempPosUp == 0) {
+                return true;
+            }
+            else if (type == "LeftCornerUp" && tempPosLeft == 0 && tempPosUp == 0) {
+                return true;
+            }
+            else if (type == "RightSideIsFlat" && tempPosLeft == 24 && (tempPosUp == 6 || tempPosUp == 12 || tempPosUp == 18)) {
+                return true;
+            }
+            else if (type == "normal" && (tempPosLeft == 6 || tempPosLeft == 12 || tempPosLeft == 18) && (tempPosUp == 6 || tempPosUp == 12 || tempPosUp == 18)) {
+                return true;
+            }
+            else if (type == "LeftSideIsFlat" && tempPosLeft == 0 && (tempPosUp == 6 || tempPosUp == 12 || tempPosUp == 18)) {
+                return true;
+            }
+            else if (type == "RightCornerDown" && tempPosLeft == 24 && tempPosUp == 24) {
+                return true;
+            }
+            else if (type == "BottomRow" && (tempPosLeft == 18 || tempPosLeft == 12 || tempPosLeft == 6) && tempPosUp == 24) {
+                return true;
+            }
+            else if (type == "LeftCornerDown" && tempPosLeft == 0 && tempPosUp == 24) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        // check new position with temp number to not change currentPos until passing valid piece check
+        function checkNewPosition() {
+            console.log("Old LeftPos:", tempPosLeft, " Old UpPos:", tempPosUp);
+            if ((tempPosLeft - 6) < 0) {
+                tempPosLeft = 24;
+                if (tempPosUp + 6 <= 24) {
+                    tempPosUp = tempPosUp + 6; // 1 row = 0 , 2 = 6, 3 = 12, 4 = 18, 5 = 24
                 }
             } else {
-                currentPosLeft -= 6;
+                tempPosLeft -= 6;
             }
-            console.log("Left:", currentPosLeft, " Up:", currentPosUp);
+            console.log("New LeftPos:", tempPosLeft, " New UpPos:", tempPosUp);
+            console.log('');
+        }
+
+        function checkWinCondition() {
+            if (currentPosUp == 24 && currentPosLeft == 0) {
+                showVictoryHTML();
+            }
         }
 
         function getNewColor() {
-            currentColor = (currentColor % 2 == 0) ? 1 : 2;
-            console.log(currentColor);
+            return (currentColor % 2 == 0) ? 1 : 2;
         }
 
-        function printYouWin() {
-            console.log("You win! temporarily...");
-        }
-
-        function showResetButton() {
-            console.log("Still haven't added reset button, sorry.")
+        function showVictoryHTML() {
+            document.getElementById('exerciseText').innerHTML = /*HTML*/`
+            <h1>YOU WIN</h1><br/>
+            <button onclick='location.reload()'>Restart game!</button>
+            `;
         }
 
         document.getElementById('exerciseText').innerHTML = /*HTML*/`            
-                <h2>Oppgave</h2>
-                <ol>
-                    <li>Studer koden og prøv å forstå mest mulig av hva som foregår. CSS er ikke viktig, men på
-                        <tt>board</tt> brukes <tt>position: absolute</tt>
-                        for å kunne legge brikkene delvis oppå hverandre, og dette har vi ikke brukt i kurset før.
-                        (Det er noe man bør unngå å bruke.) Brikkene har jeg stjålet herfra: <a target="_new" href="https://codepen.io/ProfessorSamoff/pen/ByJoaE">codepen.io/ProfessorSamoff/pen/ByJoaE</a>
-                        Jeg har ikke studert i detalj hvordan de er bygget, og det trenger ikke dere gjøre heller.                         
-                        <br/>&nbsp;
+            <h2>Oppgave</h2>
+            <ol>
+                <li>Studer koden og prøv å forstå mest mulig av hva som foregår. CSS er ikke viktig, men på
+                    <tt>board</tt> brukes <tt>position: absolute</tt>
+                    for å kunne legge brikkene delvis oppå hverandre, og dette har vi ikke brukt i kurset før.
+                    (Det er noe man bør unngå å bruke.) Brikkene har jeg stjålet herfra: <a target="_new" href="https://codepen.io/ProfessorSamoff/pen/ByJoaE">codepen.io/ProfessorSamoff/pen/ByJoaE</a>
+                    Jeg har ikke studert i detalj hvordan de er bygget, og det trenger ikke dere gjøre heller.                         
+                    <br/>&nbsp;
+                </li>
+                <li>Så skal vi i gang å endre på dette. Dere må på ingen måte forstå alt som foregår for å gjøre disse
+                    oppgavene. Sånn er det i bedrift også;
+                    du går inn og gjør endring på en liten del av koden uten å forstå alt rundt. 
+                    <b>Hvert team må vurdere hvor mye eller lite av denne oppgaven dere vil gjøre</b>. Alle bør gjøre litt, men 
+                    det kan være at de siste oppgavene er riktige å hoppe over for noen team.
+                    <br/>&nbsp;
                     </li>
-                    <li>Så skal vi i gang å endre på dette. Dere må på ingen måte forstå alt som foregår for å gjøre disse
-                        oppgavene. Sånn er det i bedrift også;
-                        du går inn og gjør endring på en liten del av koden uten å forstå alt rundt. 
-                        <b>Hvert team må vurdere hvor mye eller lite av denne oppgaven dere vil gjøre</b>. Alle bør gjøre litt, men 
-                        det kan være at de siste oppgavene er riktige å hoppe over for noen team.
-                        <br/>&nbsp;
-                        </li>
-                    <li>
-                        Hvis man trykker på den første brikken nederst til venstre på siden, kalles funksjonen
-                        <tt>addNormalPuzzlePieceToBoard()</tt>. (Ev. høyreklikk på denne brikken i nettleseren og velg inspiser. Da vil du 
-                        se HTML-koden som ligger bak.)
-                        Lag funksjonen <tt>addNormalPuzzlePieceToBoard()</tt>, slik at brikken legges til på brettet. 
-                        Kommenter ut linjene som begynner med <tt>addPuzzlePiece('board'...</tt> - de var bare ment for å vise eksempler på hvordan man kan legge til ulike brikker i 
-                        ulike posisjoner på brettet. Men eksperimenter med dem for å forstå hvordan de ulike verdiene man kan sende inn som argument påvirker sluttresultatet<br/>
-                        For at skjøtene mellom brikkene skal virke, må vi tegne opp dette fra øverst til høyre, så mot venstre - og så starte på neste linje helt til høyre. 
-                        &nbsp;<br/>
-                    </li>
-                    <li>
-                        Utvid funksjonen slik at første gang den kalles legges det til en brikke med 24 som argument for både <tt>leftPosition</tt> og  0 for <tt>topPosition</tt>.<br/>&nbsp;
-                        Og at for hver gang den kalles så brukes det 6 mindre enn forrige gang for <tt>leftPosition</tt>. (Første gang 24, så 18, så 12, så 6 og så 0.)
-                    </li>
-                    <li>
-                        Utvid funksjonen slik at hvis man har kalt funksjonen fem ganger så bruker den igjen 24 for <tt>leftPosition</tt> og bruker 6 mer enn forrige gang for <tt>topPosition</tt>.
-                        <br/>&nbsp;
-                    </li>
-                    <li>
-                        Sørg for at det annenhver gang blir farge 1 og annenhver gang farge 2.<br/>&nbsp;
-                    </li>
-                    <li>
-                        Lag ferdig knapperaden slik at det er knapper for alle disse alternativene: 
-                        <ul>
-                            <li>Normal brikke</li>
-                            <li>Slett toppkant - ellers normal</li>
-                            <li>Slett høyrekant - ellers normal</li>
-                            <li>Slett bunnkant - ellers normal</li>
-                            <li>Slett venstrekant - ellers normal</li>
-                            <li>Slett hjørne i topp og mot venstre - ellers normal</li>
-                            <li>Slett hjørne i topp og mot høyre - ellers normal</li>
-                            <li>Slett hjørne i bunn og mot venstre - ellers normal</li>
-                            <li>Slett hjørne i bunn og mot høyre - ellers normal</li>
-                        </ul>
-                        Sørg for at alle knappene virker og legger til riktig type brikke. <br/>&nbsp;
-                    </li>
-                    <li>
-                        Implementer følgende regler:
-                        <ul>
-                            <li>På første rad kan man bare legge til brikker som har slett topp</li>
-                            <li>På siste rad kan man bare legge til brikker som har slett bunn</li>
-                            <li>I første kolonne kan man bare legge til brikker som har slett venstrekant</li>
-                            <li>I siste kolonne kan man bare legge til brikker som har slett høyrekant</li>
-                        </ul>
-                    </li>
-
-                </ol>
-            `;
+                <li>
+                    Hvis man trykker på den første brikken nederst til venstre på siden, kalles funksjonen
+                    <tt>addNormalPuzzlePieceToBoard()</tt>. (Ev. høyreklikk på denne brikken i nettleseren og velg inspiser. Da vil du 
+                    se HTML-koden som ligger bak.)
+                    Lag funksjonen <tt>addNormalPuzzlePieceToBoard()</tt>, slik at brikken legges til på brettet. 
+                    Kommenter ut linjene som begynner med <tt>addPuzzlePiece('board'...</tt> - de var bare ment for å vise eksempler på hvordan man kan legge til ulike brikker i 
+                    ulike posisjoner på brettet. Men eksperimenter med dem for å forstå hvordan de ulike verdiene man kan sende inn som argument påvirker sluttresultatet<br/>
+                    For at skjøtene mellom brikkene skal virke, må vi tegne opp dette fra øverst til høyre, så mot venstre - og så starte på neste linje helt til høyre. 
+                    &nbsp;<br/>
+                </li>
+                <li>
+                    Utvid funksjonen slik at første gang den kalles legges det til en brikke med 24 som argument for både <tt>leftPosition</tt> og  0 for <tt>topPosition</tt>.<br/>&nbsp;
+                    Og at for hver gang den kalles så brukes det 6 mindre enn forrige gang for <tt>leftPosition</tt>. (Første gang 24, så 18, så 12, så 6 og så 0.)
+                </li>
+                <li>
+                    Utvid funksjonen slik at hvis man har kalt funksjonen fem ganger så bruker den igjen 24 for <tt>leftPosition</tt> og bruker 6 mer enn forrige gang for <tt>topPosition</tt>.
+                    <br/>&nbsp;
+                </li>
+                <li>
+                    Sørg for at det annenhver gang blir farge 1 og annenhver gang farge 2.<br/>&nbsp;
+                </li>
+                <li>
+                    Lag ferdig knapperaden slik at det er knapper for alle disse alternativene: 
+                    <ul>
+                        <li>Normal brikke</li>
+                        <li>Slett toppkant - ellers normal</li>
+                        <li>Slett høyrekant - ellers normal</li>
+                        <li>Slett bunnkant - ellers normal</li>
+                        <li>Slett venstrekant - ellers normal</li>
+                        <li>Slett hjørne i topp og mot venstre - ellers normal</li>
+                        <li>Slett hjørne i topp og mot høyre - ellers normal</li>
+                        <li>Slett hjørne i bunn og mot venstre - ellers normal</li>
+                        <li>Slett hjørne i bunn og mot høyre - ellers normal</li>
+                    </ul>
+                    Sørg for at alle knappene virker og legger til riktig type brikke. <br/>&nbsp;
+                </li>
+                <li>
+                    Implementer følgende regler:
+                    <ul>
+                        <li>På første rad kan man bare legge til brikker som har slett topp</li>
+                        <li>På siste rad kan man bare legge til brikker som har slett bunn</li>
+                        <li>I første kolonne kan man bare legge til brikker som har slett venstrekant</li>
+                        <li>I siste kolonne kan man bare legge til brikker som har slett høyrekant</li>
+                    </ul>
+                </li>
+            </ol>
+        `;
 
     </script>
 </body>
-
-</html>
